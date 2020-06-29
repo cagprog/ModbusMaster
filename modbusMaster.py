@@ -76,35 +76,35 @@ def mainLoop():
 
     def func3g(slvD,a,d):   #Read n words: function 3
         #print('***************')
-        mesaj='Query>>> f:3(read n w) mdA: {}  dA: {}  nr: {}'.format(slvD.mdbsAdress,a,d)
+        mesaj='Query>>> func:3(read n words) devAddr: {}  dataAddr: {}  nr of data: {}'.format(slvD.mdbsAdress,a,d)
         ui.goster(mesaj)
         response=slvD.func3(slvD.mdbsAdress,a,d)
         mesaj='           Response : [{}]'.format(', '.join(hex(x) for x in response))
         ui.goster(mesaj)
         return response
     def func6g(slvD,address,data): #write a word
-        mesaj='Query>>> f:6(write a word) mdA: {}  dA: {}  data: {}'.format(slvD.mdbsAdress,address,data)
+        mesaj='Query>>> func:6(write a word) devAddr: {}  dataAddr: {}  data: {}'.format(slvD.mdbsAdress,address,data)
         ui.goster(mesaj)
         response=slvD.func6(slvD.mdbsAdress,address,data)
         mesaj='           Response : [{}]'.format(', '.join(hex(x) for x in response))
         ui.goster(mesaj)
         return response
     def func8g(slvD,subfunccode): #diagnostic
-        mesaj='Query>>> f:8(diagnostic) mdA: {}  sub func: {}  '.format(slvD.mdbsAdress,subfunccode)
+        mesaj='Query>>> func:8(diagnostic) devAddr: {}  sub func: {}  '.format(slvD.mdbsAdress,subfunccode)
         ui.goster(mesaj)
         response=slvD.func8(slvD.mdbsAdress,subfunccode)
         mesaj='           Response : [{}]'.format(', '.join(hex(x) for x in response))
         ui.goster(mesaj)
         return response
     def func16g(slvD,dataaddress,datalist): #Write n consecutive words: function 16
-        mesaj='Query>>> f:16(Write n consecutive words) mdA: {}  dataadres {}  datalist: {}  '.format(slvD.mdbsAdress,dataaddress,datalist)
+        mesaj='Query>>> func:16(Write n consecutive words) devAddr: {}  dataAddr: {}  datalist: {}  '.format(slvD.mdbsAdress,dataaddress,datalist)
         ui.goster(mesaj)
         response=slvD.func16(slvD.mdbsAdress,dataaddress,datalist)
         mesaj='           Response : [{}]'.format(', '.join(hex(x) for x in response))
         ui.goster(mesaj)
         return response
 
-
+    dtonceki=datetime.timestamp(datetime.now())
     while (not quit_program):
         if port_selected:
             for slvDev in slvArray:
@@ -127,7 +127,7 @@ def mainLoop():
                     ui.portSelectBox.setEnabled(True)
                     serial_ports()
                     ui.setportlist()
-                ui.goster(str(round(datetime.timestamp(datetime.now())-dtonceki,2)))
+                ui.goster('scan time(sec):'+str(round(datetime.timestamp(datetime.now())-dtonceki,2)))
                 dtonceki=datetime.timestamp(datetime.now())
         else:
             if not 'prevList' in locals():
