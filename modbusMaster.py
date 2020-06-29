@@ -52,7 +52,7 @@ class displayForm(pk.Ui_Form):
         global selected_port
 
         selected_port=serial_port_list[self.portSelectBox.currentIndex()]
-        print(selected_port,'  Seçildi')
+        print(selected_port,'  Selected..')
         self.portSelectBox.setEnabled(False)
         port_selected=True
         myserialPort = serial.Serial(selected_port, baudrate=19200,bytesize=serial.EIGHTBITS,parity=serial.PARITY_EVEN,stopbits=serial.STOPBITS_ONE,timeout=1)
