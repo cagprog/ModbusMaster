@@ -1,46 +1,51 @@
 import serial
 import threading
 from datetime import datetime
-import pk #pyuic5 pk.ui -o pk.py
+import pk 
 import modbusmaslib
-#import sys,glob #for listing serial ports
 import serial.tools.list_ports  #for listing serial ports
-
-
-#TODO:
-#online olmayan cihazlar her dongüde sorgulanmayacak.
-#8-10 dongude bir sorgulanacak.boylece hız kazanılacak...
-#birden fazla cihaz offline ise her döngüde bir adet sorgulanacak.
-#testval=True
 
 serial_port_list=[]
 serial_hwid_list=[]
 selected_port=''
 port_selected=False
 quit_program=False
+
 default_serial_port_loc='LOCATION=1-2.2'  #default serial port location
 
 class displayForm(pk.Ui_Form):
+    enable_display=True
     def setupUiChield(self,Form):
         self.setupUi(Form)
         self.model = pk.QtGui.QStandardItemModel()
-        self.listView.setModel(self.model)#listView görmek için......
+        self.listView.setModel(self.model)#to see listView ......
 
         self.pushButton_1.setText("Exit")
         self.pushButton_1.clicked.connect(self.klik1)
+
+        
+        self.pushButton_2.clicked.connect(self.klik2)
      
         self.portSelectBox.activated.connect(self.compSelClick)
 
     def goster(self,entry):
-        item = pk.QtGui.QStandardItem(str(entry))
-        self.model.appendRow(item)
+        if self.enable_display:
+            item = pk.QtGui.QStandardItem(str(entry))
+            self.model.appendRow(item)
 
     def klik1(self):
         global quit_program
         self.goster('Exit')
         quit_program=True
-        testval=False #TODO neden tanımıyor ?????
         sys.exit(0)
+
+    def klik2(self):
+        if self.enable_display:
+            self.enable_display=False
+            self.pushButton_2.setText("Enable Display")
+        else:
+            self.enable_display=True
+            self.pushButton_2.setText("Disable Display")
 
     def compSelClick(self):
         global port_selected
@@ -57,19 +62,12 @@ class displayForm(pk.Ui_Form):
     def setportlist(self):
         self.portSelectBox.clear()
         self.portSelectBox.addItems(serial_hwid_list)
-    
-    #TODO conn.close() olacakmı
 
 class slvModules(modbusmaslib.slvDevice):
     def __init__(self,adresxx):
         super().__init__(adresxx)
-        """self.serial.baudrate=19200
-        self.serial.parity=serial.PARITY_EVEN
-        self.serial.bytesize=serial.EIGHTBITS
-        self.serial.stopbits=serial.STOPBITS_ONE
-        self.serial.timeout = 1"""
 
-def anaDongu():
+def mainLoop():
     dtonceki=0
     loopPeriod=0.1 #sn.
     msgInterval=0.01 #sn.
@@ -108,28 +106,23 @@ def anaDongu():
 
 
     while (not quit_program):
-        #print(port_selected)
         if port_selected:
             for slvDev in slvArray:
-                #print(slvDev.mdbsAdress)
                 try:
+                    #followings are sample messages
+                    #Type here messages you want to send
                     t1=func3g(slvDev,10,5)
                     t2=func3g(slvDev,10,2)
                     t61=func6g(slvDev,20,30)
                     t81=func8g(slvDev,0)
                     t161=func16g(slvDev,50,[256,257,258])
                 except modbusmaslib.NoResponseError:
-                    mesaj='        {} adresinde hata ....cevap yok '.format(slvDev.mdbsAdress)
-                    #print("hata cevap gelmedi...")
+                    mesaj=' error at address {} no response ...'.format(slvDev.mdbsAdress)
                     ui.goster(mesaj)
                 except modbusmaslib.InvalidResponseError:
-                    print ('modbuslib.InvalidResponseError:  hatası...')
+                    print ('modbuslib.InvalidResponseError:  error...')
                 except modbusmaslib.comPortError:
-                    #sudo chmod a+rw /dev/ttyUSB1  yapılmazsa bu hatayı veriyor.
-                    #alt satırdaki gibi de izin verilebilir...
-                    #import subprocess
-                    #subprocess.Popen(["sudo", "chmod", "666", "/dev/ttyUSB0"], stdout=subprocess.PIPE, shell=True)
-                    print('modbusmaslib.comPortError    hatası...')
+                    print('modbusmaslib.comPortError    error...')
                     port_selected=False
                     ui.portSelectBox.setEnabled(True)
                     serial_ports()
@@ -145,7 +138,7 @@ def anaDongu():
             prevList=serial_port_list.copy()
 
 def serial_ports():
-    global serial_port_list #method içinden ulaşmak için 'global' kullanılmalı
+    global serial_port_list 
     global serial_hwid_list
     #*****  Lists serial port names  *****
     ports = serial.tools.list_ports.comports()
@@ -156,10 +149,7 @@ def serial_ports():
         serial_hwid_list.append(hwid)
  
 if __name__ == "__main__":
-    # pk.py main den alındı .. form göster******************
     import sys
-    testval=True
-
     app = pk.QtWidgets.QApplication(sys.argv)
     Form = pk.QtWidgets.QWidget()
     ui = displayForm()
@@ -172,20 +162,21 @@ if __name__ == "__main__":
 
     #***Build slave list***
     slvArray=[]
+    # add here your modbus devices
     slvArray.append(slvModules(1))
     slvArray.append(slvModules(2))
     slvArray.append(slvModules(3))
 
-    for indks in range(len(serial_hwid_list)):   # port, desc, hwid in sorted(ports):
+    for indks in range(len(serial_hwid_list)):   
         if default_serial_port_loc in serial_hwid_list[indks]:
             selected_port=serial_port_list[indks]
-            print(selected_port,' Seçildi..')
+            print(selected_port,' Selected..')
             port_selected=True
             ui.portSelectBox.setEnabled(False)
             myserialPort = serial.Serial(selected_port, baudrate=19200,bytesize=serial.EIGHTBITS,parity=serial.PARITY_EVEN,stopbits=serial.STOPBITS_ONE,timeout=1)
             for x in slvArray:
                 x.serialObj=myserialPort
 
-    dongu=threading.Thread(target=anaDongu)
+    dongu=threading.Thread(target=mainLoop)
     dongu.start()
-    sys.exit(app.exec_()) #form gostermek için
+    sys.exit(app.exec_())

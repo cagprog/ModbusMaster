@@ -33,49 +33,7 @@
     <item>
      <widget class="QPushButton" name="pushButton_2">
       <property name="text">
-       <string>Start Rec</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_3">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_4">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_5">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_6">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_7">
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_8">
-      <property name="text">
-       <string>PushButton</string>
+       <string>Disable Display</string>
       </property>
      </widget>
     </item>

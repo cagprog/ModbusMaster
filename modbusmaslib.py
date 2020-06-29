@@ -1,3 +1,5 @@
+#Modbus RTU Master library
+#Uses function 3,6,8,16
 import serial
 import threading
 from datetime import datetime
@@ -6,7 +8,7 @@ HIGHBYTE=0
 LOWBYTE=1
 
 class NoResponseError(Exception):
-    def __init__(self,message="query cevap alamadı..."):
+    def __init__(self,message="query get no responce..."):
         self.message = message
         super().__init__(self.message)
 
@@ -24,8 +26,8 @@ class slvDevice():
     mdbsAdress=int()
     isOnline=bool
     #serialObj
-    def __init__(self,adresxx):
-        self.mdbsAdress=adresxx
+    def __init__(self,adres):
+        self.mdbsAdress=adres
 
     def Mod_CRC16tablo(self,nData,wLength):
         wCRCTable = [
@@ -60,7 +62,7 @@ class slvDevice():
         0X8801, 0X48C0, 0X4980, 0X8941, 0X4B00, 0X8BC1, 0X8A81, 0X4A40,
         0X4E00, 0X8EC1, 0X8F81, 0X4F40, 0X8D01, 0X4DC0, 0X4C80, 0X8C41,
         0X4400, 0X84C1, 0X8581, 0X4540, 0X8701, 0X47C0, 0X4680, 0X8641,
-        0X8201, 0X42C0, 0X4380, 0X8341, 0X4100, 0X81C1, 0X8081, 0X4040 ]#32x8=256 adet veri
+        0X8201, 0X42C0, 0X4380, 0X8341, 0X4100, 0X81C1, 0X8081, 0X4040 ]#32x8=256 datas
         if len(nData)<wLength:
             print ('crc calculation error:',nData,wLength)
             return (0,0)
@@ -69,7 +71,7 @@ class slvDevice():
         wCRCWord = 0xFFFF
         for pos in range(wLength):
             nTemp = 0x00ff & (nData[pos] ^ wCRCWord)
-            wCRCWord >>= 8    # 8 kez shift right
+            wCRCWord >>= 8    # 8 times shift right
             wCRCWord ^= wCRCTable[nTemp]
         sonuc=divmod(wCRCWord,256)
         return [sonuc[0],sonuc[1]]
@@ -84,9 +86,9 @@ class slvDevice():
         response=bytearray(0)
         while (datetime.timestamp(datetime.now())-dt)<1:
             try:
-                bekleyen_sayi=self.serialObj.in_waiting
-                if bekleyen_sayi>0:
-                    zz=self.serialObj.read(bekleyen_sayi)
+                nr_waiting=self.serialObj.in_waiting
+                if nr_waiting>0:
+                    zz=self.serialObj.read(nr_waiting)
                     for k in zz:
                         response.append(k)
                 if (len(response)==responselength):
@@ -106,7 +108,7 @@ class slvDevice():
         crc=self.Mod_CRC16tablo(query,6)
         query[6]=crc[LOWBYTE]
         query[7]=crc[HIGHBYTE]
-        #print ('func 3 çağrıldı...[{}]'.format(', '.join(hex(x) for x in query)))
+        #print ('func 3 called...[{}]'.format(', '.join(hex(x) for x in query)))
         return self.sendquery(query,query[5]*2+5)
     
     def func6(self,slvaddress,dataaddress,data):
